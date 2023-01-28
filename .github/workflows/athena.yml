@@ -1,8 +1,10 @@
 name: Athena CI
 
 on:
-  pull_request:
-    branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+  push:
+    tags: [ v1.* ]
 
 defaults:
   run:
@@ -16,12 +18,16 @@ jobs:
   test-suite:
     name: Test suite
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - name: Setup CouchDB
         uses: cobot/couchdb-action@v4
         with:
@@ -36,12 +42,16 @@ jobs:
   start-athena:
     name: Start Athena
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - name: Setup CouchDB
         uses: cobot/couchdb-action@v4
         with:
@@ -54,23 +64,31 @@ jobs:
   audit:
     name: NPM Audit
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - run: npm audit --prod
 
   openapi:
     name: Validate OpenAPI
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - run: npm config set registry https://registry.npmjs.org/
       - run: npm install -g ibm-openapi-validator@0.51.1
       - run: npm run validate
@@ -78,11 +96,15 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - run: npm ci
       - run: npm run lint

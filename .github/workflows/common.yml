@@ -1,8 +1,10 @@
 name: Common CI
 
 on:
-  pull_request:
-    branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+  push:
+    tags: [ v1.* ]
 
 jobs:
   audit:
@@ -11,11 +13,13 @@ jobs:
     strategy:
       matrix:
         project: [apollo, athena, stitch]
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - name: Audit NPM
         run: npm audit --production
         working-directory: ./packages/${{ matrix.project }}
@@ -24,6 +28,9 @@ jobs:
   detect-secrets:
     name: Detect Secrets
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildx: [ x64, arm64 ]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -32,6 +39,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
+          architecture: ${{ matrix.buildx }}
       - name: Install detect-secrets
         run: pip install --upgrade git+https://github.com/ibm/detect-secrets.git@0.13.1+ibm.52.dss#egg=detect-secrets
       - name: Install Lerna
