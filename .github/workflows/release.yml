@@ -58,8 +58,8 @@ jobs:
         id: push
         uses: docker/build-push-action@v3
         with:
-          context: ./docker/console/Dockerfile
-          file: Dockerfile
+          context: .
+          file: ./docker/console/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
